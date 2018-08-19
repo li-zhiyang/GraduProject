@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+    <title>首页</title>
+    <link rel="stylesheet" href="https://cache.amap.com/lbs/static/main1119.css"/>
+    <link rel="stylesheet" href="/webjars/bootstrap/dist/css/bootstrap.css">
+
+    <style type="text/css">
+        .info {
+            border: solid 1px silver;
+        }
+        div.info-top {
+            position: relative;
+            background: none repeat scroll 0 0 #F9F9F9;
+            border-bottom: 1px solid #CCC;
+            border-radius: 5px 5px 0 0;
+        }
+        div.info-top div {
+            display: inline-block;
+            color: #333333;
+            font-size: 14px;
+            font-weight: bold;
+            line-height: 31px;
+            padding: 0 10px;
+        }
+        div.info-top img {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            transition-duration: 0.25s;
+        }
+        div.info-top img:hover {
+            box-shadow: 0px 0px 5px #000;
+        }
+        div.info-middle {
+            font-size: 14px;
+            padding: 6px;
+            line-height: 20px;
+        }
+        div.info-bottom {
+            height: 0px;
+            width: 100%;
+            clear: both;
+            text-align: center;
+        }
+        div.info-bottom img {
+            position: relative;
+            z-index: 104;
+        }
+        span {
+            margin-left: 5px;
+            font-size: 11px;
+        }
+        .info-middle img {
+            float: left;
+            margin-right: 6px;
+        }
+    </style>
+
+    <script src="/webjars/jquery/dist/jquery.js"></script>
+    <script type="text/javascript"
+            src="https://webapi.amap.com/maps?v=1.4.6&key=26242736f88f8792167c6ada388c2381"></script>
+</head>
+<body>
+<div id="container"></div>
+<script>
+    //初始化地图
+    var map = new AMap.Map('container', {
+        center: [117.285789, 31.858566],
+        zoom: 13
+    });
+    map.plugin(["AMap.ToolBar"], function () {
+        map.addControl(new AMap.ToolBar());
+    });
+
+    var allcarinfo = null;
+
+    $.ajax({
+        type: "post",
+        url: "/carstate/getall",
+        dataType: "json",
+        async:false,
+        success:function (data) {
+            allcarinfo = data;
+        }
+    });
+
+    var infoWindow = new AMap.InfoWindow({
+        isCustom: true,
+        offset: new AMap.Pixel(16, -45)
+    });
+
+    for (var i = 0, marker; i < allcarinfo.length; i++) {
+        marker = new AMap.Marker({
+            position: [allcarinfo[i].longitude, allcarinfo[i].latitude],
+            icon: "/assets/img/car.png",
+            map: map
+        });
+        //TODO 设计自定义窗体信息
+        marker.content = createInfoWindow(i);
+        marker.on('click', markerClick);
+    }
+    function markerClick(e) {
+        infoWindow.setContent(e.target.content);
+        map.setZoomAndCenter(15, e.target.getPosition());
+        infoWindow.open(map, e.target.getPosition());
+    }
+    map.setFitView();
+
+
+    //构建自定义信息窗体
+    function createInfoWindow(i) {
+
+        var title = allcarinfo[i].licplate,
+            content = [];
+
+        content.push("驾驶员："+allcarinfo[i].driver);
+        content.push("车速："+ allcarinfo[i].speed+ "km/h");
+        content.push("发动机转速："+allcarinfo[i].tspeed+"r/min");
+        content.push("水温："+allcarinfo[i].watertemp+"℃");
+        content.push("油温："+allcarinfo[i].oiltemp+"℃");
+        content.push("油量："+allcarinfo[i].oilmass+"%");
+        content.push("安全带："+formatter(allcarinfo[i].safebelt));
+        content.push("手制动："+formatter(allcarinfo[i].braking));
+        content.push("电量："+allcarinfo[i].elecquantity);
+        content.push("电压： "+allcarinfo[i].voltage+"V ");
+        content.push("电流："+allcarinfo[i].eleccurrent+"A");
+        content.push("电池温度："+allcarinfo[i].batterytemp+" ℃");
+
+        var info = document.createElement("div");
+        info.className = "info";
+
+        //可以通过下面的方式修改自定义窗体的宽高
+        //info.style.width = "400px";
+        // 定义顶部标题
+        var top = document.createElement("div");
+        var titleD = document.createElement("div");
+        var closeX = document.createElement("img");
+        top.className = "info-top";
+        titleD.innerHTML = title;
+        closeX.src = "http://webapi.amap.com/images/close2.gif";
+        closeX.onclick = closeInfoWindow;
+
+        top.appendChild(titleD);
+        top.appendChild(closeX);
+        info.appendChild(top);
+
+        // 定义中部内容
+        var middle = document.createElement("div");
+        middle.className = "info-middle";
+        middle.style.backgroundColor = 'white';
+        middle.innerHTML = content;
+        info.appendChild(middle);
+
+        // 定义底部内容
+        var bottom = document.createElement("div");
+        bottom.className = "info-bottom";
+        bottom.style.position = 'relative';
+        bottom.style.top = '0px';
+        bottom.style.margin = '0 auto';
+        var sharp = document.createElement("img");
+        sharp.src = "http://webapi.amap.com/images/sharp.png";
+        bottom.appendChild(sharp);
+        info.appendChild(bottom);
+        return info;
+    }
+
+    //关闭信息窗体
+    function closeInfoWindow() {
+        map.clearInfoWindow();
+    }
+
+    //格式化安全带和手制动数据
+    function formatter(value){
+        if(value === "1"){
+            return "<span class=\"label label-success\">正常</span>";
+        }else{
+            return "<span class=\"label label-warning\">异常</span>";
+        }
+    }
+
+</script>
+</body>
+</html>

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>用户账号管理</title>
+
+    <link rel="stylesheet" href="/webjars/bootstrap/dist/css/bootstrap.css">
+    <link rel="stylesheet" href="/webjars/bootstrap-table/dist/bootstrap-table.css">
+
+    <script src="/webjars/jquery/dist/jquery.js"></script>
+    <script src="/webjars/bootstrap/dist/js/bootstrap.js"></script>
+    <script src="/webjars/bootstrap-table/dist/bootstrap-table.js"></script>
+    <script src="/webjars/bootstrap-table/dist/locale/bootstrap-table-zh-CN.js"></script>
+
+</head>
+<body>
+<div class="container">
+    <!--TODO 将标题和toolbar 放在一行-->
+    <div id="toolbar">
+        <button id="add" type="submit" class="btn btn-success">
+            <span class="glyphicon glyphicon-plus">添加</span>
+        </button>
+        <span id="returnMessage"></span>
+        <!--</div>-->
+    </div>
+    <!--data-strict-search="true"-->
+    <table id="table"
+           data-toggle="table"
+           data-height="540"
+           data-toolbar="#toolbar"
+           data-show-refresh="true"
+           data-show-columns="true"
+           data-striped="true"
+           data-search="true"
+
+           data-url="/usermanager/alluserlist">
+        <thead>
+        <tr>
+            <th data-field="state" data-checkbox="true"></th>
+            <th data-field="userid" data-halign="center">用户ID</th>
+            <th data-field="username" data-halign="center">用户名</th>
+            <th data-field="password" data-halign="center">登录密码</th>
+            <th data-field="authority" data-formatter="authorityFormatter" data-halign="center">权限</th>
+            <th data-field="operate" data-formatter="operateFormatter" data-halign="center" data-align="center" data-events="operateEvents">
+                操作
+            </th>
+        </tr>
+        </thead>
+    </table>
+
+
+    <!--用户信息模态框-->
+    <div class="modal fade" id="userInfoModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog" style="width: 700px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">编辑用户信息</h4>
+                </div>
+
+                <div class="modal-body " style="height: 250px">
+
+                    <form id="userinfo" name="userinfo">
+                        <div class="container-fluid">
+                            <div class="row-fluid">
+
+                                <div class="form-group col-sm-6">
+                                    <label class="control-label col-sm-6">用户ID</label>
+                                    <input id="userid" name="userid" type="text" class="form-control col-sm-6"
+                                           placeholder="输入用户ID">
+                                </div>
+
+                                <div class="form-group col-sm-6">
+                                    <label class="control-label col-sm-6">用户名</label>
+                                    <input id="username" name="username" type="text" class="form-control col-sm-6"
+                                           placeholder="输入用户名">
+                                </div>
+
+                                <div class="form-group col-sm-6">
+                                    <label class="control-label col-sm-6">登录密码</label>
+                                    <input id="password" name="password" type="text" class="form-control col-sm-6"
+                                           placeholder="输入密码" value="123456">
+                                </div>
+
+                                <div class="form-group col-sm-6">
+                                    <label for="authority" class="control-label col-sm-6">用户权限</label>
+                                    <select id="authority" name="authority" class="form-control col-sm-6">
+                                        <option value="default">选择用户权限</option>
+                                        <option value="0">管理员</option>
+                                        <option value="1">普通用户</option>
+                                    </select>
+                                </div>
+
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+
+                <div class="text-right modal-footer">
+                    <span id="returnMessageModal"> </span>
+                    <!--增加按钮-->
+                    <button id="addin" type="button" class="btn btn-success">确定</button>
+                    <!--编辑按钮-->
+                    <button id="editor" type="button" class="btn btn-success">确定</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+<script>
+    var $table = $('#table')
+
+    //格式化权限
+    function authorityFormatter(value, row, index) {
+        value = value.trim();
+        if (value === "0") {
+            return "管理员";
+        } else {
+            return "普通用户";
+        }
+    }
+
+    function operateFormatter(value, row, index) {
+        return "<a class='edit' href=\"javascript:void(0)\" ><i class=\"glyphicon glyphicon-pencil\"></i></a>&nbsp;"
+            + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class='delete' href=\"javascript:void(0)\" ><i class=\"glyphicon glyphicon-trash\"></i></a>";
+    }
+
+    window.operateEvents = {
+        'click .edit': function (e, value, row) {
+
+            $("#addin").hide();
+            $("#editor").show();
+
+            $("#userid").val(row.userid);
+            $("#password").val(row.password);
+            $("#username").val(row.username);
+            var auth = row.authority.trim();
+            $("#authority option[value='"+auth+"']").attr("selected", true);
+
+            $("#userInfoModal").modal("show");
+
+        },
+        'click .delete': function (e, value, row) {
+            $table.bootstrapTable('remove', {
+                field: 'userid',
+                values: [row.userid]
+            });
+            $.ajax({
+                url: "/usermanager/deleteUser",
+                async: false,
+                type: "POST",
+                data: row,
+                success: function (result) {
+                    if (result) {
+                        $("#returnMessage").hide().html('<label class="label label-success">删除成功!</label>').show(300);
+                    } else {
+                        $("#returnMessage").hide().html('<label class="label label-danger">删除失败!</label>').show(300);
+                        $table.bootstrapTable('refresh');
+                    }
+                }, error: function () {
+                    $("#returnMessage").hide().html('<label class="label label-danger">删除失败!</label>').show(300);
+                }
+            })
+        }
+    };
+
+    $("#add").click(function () {
+        $("#editor").hide();
+        $("#addin").show();
+        $("#userid").val("");
+        $("#password").val("");
+        $("#username").val("");
+        $("#authority option[value='"+"default"+"']").attr("selected", true);
+
+        $("#userInfoModal").modal("show");
+
+    });
+
+    $("#addin").click(function () {
+        $.ajax({
+            url: "/usermanager/addUser",
+            async: false,
+            type: "POST",
+            data: $('#userinfo').serialize(),
+            success: function (result) {
+                if (result) {
+                    $("#userInfoModal").modal("hide");
+                    $table.bootstrapTable('refresh');
+                    //window.location.reload();
+                    $("#returnMessage").hide().html('<label class="label label-success">新增成功!</label>').show(300);
+                } else {
+                    $("#returnMessageModal").hide().html('<label class="label label-danger">新增失败!</label>').show(300);
+                }
+            }, error: function () {
+                $("#returnMessageModal").hide().html('<label class="label label-danger">新增失败!</label>').show(300);
+            }
+        })
+    });
+
+    $("#editor").click(function () {
+        $.ajax({
+            url: "/usermanager/updateUser",
+            async: false,
+            type: "POST",
+            data: $('#userinfo').serialize(),
+            success: function (result) {
+                if (result) {
+                    $("#userInfoModal").modal("hide");
+                    $table.bootstrapTable('refresh');
+                    //window.location.reload();
+                    $("#returnMessage").hide().html('<label class="label label-success">修改成功!</label>').show(300);
+                } else {
+                    $("#returnMessageModal").hide().html('<label class="label label-danger">修改失败!</label>').show(300);
+                }
+            }, error: function () {
+                $("#returnMessageModal").hide().html('<label class="label label-danger">修改失败!</label>').show(300);
+            }
+        })
+    })
+
+
+
+
+</script>
+</body>
+</html>

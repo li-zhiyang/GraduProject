@@ -1,0 +1,423 @@
+<!DOCTYPE HTML>
+<html lang="zh-cn">
+
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta content="width=device-width,initial-scale=1.0" name="viewport">
+    <title>系统菜单管理</title>
+    <link rel="stylesheet" href="/webjars/bootstrap/dist/css/bootstrap.css">
+    <link rel="stylesheet" href="/webjars/bootstrap-table/dist/bootstrap-table.css">
+    <link rel="stylesheet" href="/webjars/jquery-treegrid/css/jquery.treegrid.css">
+</head>
+
+<body>
+<div class="container">
+    <!--TODO 将标题和toolbar 放在一行-->
+
+    <div id="toolbar">
+        <select id="type" style="height: 34px;padding: 6px 12px;display: inline-block;vertical-align: middle;
+            font-size: 14px;line-height: 1.42857143;color: #555;background-color: #fff;background-image: none;
+            border: 1px solid #ccc;border-radius: 4px;">
+            <option value="1">一级菜单</option>
+            <option value="2">二级菜单</option>
+        </select>
+
+        <button id="add" type="submit" class="btn btn-success">
+            <span class="glyphicon glyphicon-plus">添加</span>
+        </button>
+        <span id="returnMessage"></span>
+    </div>
+    <table id="table"></table>
+</div>
+<!--一级菜单信息模态框-->
+<div class="modal fade" id="fmenuModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" style="width: 700px">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">编辑一级菜单信息</h4>
+            </div>
+
+            <div class="modal-body " style="height: 280px">
+
+                <form id="fmenuinfo" name="fmenuinfo">
+                    <div class="container-fluid">
+
+                        <div class="row-fluid">
+                            <div class="form-group col-sm-6">
+                                <label id="flcode" class="control-label col-sm-6">菜单CODE</label>
+                                <input id="fcode" name="fcode" type="text" class="form-control col-sm-6"
+                                       placeholder="输入菜单CODE">
+                            </div>
+
+                            <div class="form-group col-sm-6">
+                                <label class="control-label col-sm-6">ID</label>
+                                <input id="fid" name="fid" type="text" class="form-control col-sm-6"
+                                       placeholder="输入ID(与页面名称相同)">
+                            </div>
+
+                            <div class="form-group col-sm-6">
+                                <label class="control-label col-sm-6">菜单名称</label>
+                                <input id="ftext" name="ftext" type="text" class="form-control col-sm-6"
+                                       placeholder="输入菜单名称">
+                            </div>
+                            <div class="form-group col-sm-6">
+                                <label for="fauthority" class="control-label col-sm-6">权限</label>
+                                <select id="fauthority" name="fauthority" class="form-control col-sm-6">
+                                    <option value="def">未分配</option>
+                                    <option value="0">管理员</option>
+                                    <option value="1">普通用户</option>
+                                    <option value="0,1">普通用户和管理员</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-sm-6">
+                                <label id="flcollapsed" for="fcollapsed" class="control-label col-sm-6">是否默认展开</label>
+                                <select id="fcollapsed" name="fcollapsed" class="form-control col-sm-6">
+                                    <option value="true">收缩</option>
+                                    <option value="false">展开</option>
+                                </select>
+                            </div>
+
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+
+            <div class="text-right modal-footer">
+                <span id="freturnMessageModal" class="glyphicon"> </span>
+                <!--增加按钮-->
+                <button id="faddin" type="button" class="btn btn-success">确定</button>
+                <!--编辑按钮-->
+                <button id="feditor" type="button" class="btn btn-success">确定</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--二级菜单信息模态框-->
+<div class="modal fade" id="smenuModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" style="width: 700px">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">编辑二级菜单信息</h4>
+            </div>
+
+            <div class="modal-body " style="height: 280px">
+
+                <form id="smenuinfo" name="smenuinfo">
+                    <div class="container-fluid">
+
+                        <div class="row-fluid">
+
+                            <div class="form-group col-sm-6">
+                                <label class="control-label col-sm-6">ID</label>
+                                <input id="sid" name="sid" type="text" class="form-control col-sm-6"
+                                       placeholder="输入ID(与页面名称相同)">
+                            </div>
+
+                            <div class="form-group col-sm-6">
+                                <label class="control-label col-sm-6">菜单名称</label>
+                                <input id="stext" name="stext" type="text" class="form-control col-sm-6"
+                                       placeholder="输入菜单名称">
+                            </div>
+
+                            <div class="form-group col-sm-6">
+                                <label id="slhref" class="control-label col-sm-6">链接</label>
+                                <input id="shref" name="shref" type="text" class="form-control col-sm-6"
+                                       placeholder="输入链接">
+                            </div>
+
+                            <div class="form-group col-sm-6">
+                                <label id="slpid" class="control-label col-sm-6">父菜单CODE</label>
+                                <input id="spid" name="spid" type="text" class="form-control col-sm-6"
+                                       placeholder="输入父菜单CODE">
+                            </div>
+
+                            <div class="form-group col-sm-6">
+                                <label for="sauthority" class="control-label col-sm-6">权限</label>
+                                <select id="sauthority" name="sauthority" class="form-control col-sm-6">
+                                    <option value="def">未分配</option>
+                                    <option value="0">管理员</option>
+                                    <option value="1">普通用户</option>
+                                    <option value="0,1">普通用户和管理员</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-sm-6">
+                                <label id="slcloseable" for="scloseable" class="control-label col-sm-6">是否可关闭</label>
+                                <select id="scloseable" name="scloseable" class="form-control col-sm-6">
+                                    <option value="true">可关闭</option>
+                                    <option value="false">不可关闭</option>
+                                </select>
+                            </div>
+
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+
+            <div class="text-right modal-footer">
+                <span id="sreturnMessageModal"> </span>
+                <!--增加按钮-->
+                <button id="saddin" type="button" class="btn btn-success">确定</button>
+                <!--编辑按钮-->
+                <button id="seditor" type="button" class="btn btn-success">确定</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+</body>
+<script src="/webjars/jquery/dist/jquery.js"></script>
+<script src="/webjars/bootstrap/dist/js/bootstrap.js"></script>
+<script src="/webjars/bootstrap-table/dist/bootstrap-table.js"></script>
+<script src="/webjars/bootstrap-table/dist/locale/bootstrap-table-zh-CN.js"></script>
+<script src="/webjars/bootstrap-table/dist/extensions/treegrid/bootstrap-table-treegrid.js"></script>
+<script src="/webjars/jquery-treegrid/js/jquery.treegrid.js"></script>
+<script type="text/javascript">
+    var $table = $('#table');
+    $(function () {
+        $table.bootstrapTable({
+            url: '/menuManager/menuTable',
+            height: 540,
+            striped: true,
+            sidePagination: 'server',
+            showRefresh: true,
+            toolbar: '#toolbar',
+            idField: 'code',
+            columns: [
+                {field: 'id', title: 'ID'},
+                {field: 'code', title: 'CODE', formatter: "codeFormatter"},
+                {field: 'text', title: '名称'},
+                {field: 'href', title: '路径'},
+                {field: 'pid', title: '父节点', visible: false},
+                {field: 'collapsed', title: '可收缩', visible: false},
+                {field: 'closeable', title: '可关闭', visible: false},
+                {field: 'authority', title: '权限值', formatter: "authorityFormatter"},
+                {
+                    field: "operate",
+                    title: "操作",
+                    align: "center",
+                    halign: "center",
+                    events: "operateEvents",
+                    formatter: "operateFormatter"
+                }
+            ],
+
+            treeShowField: 'code',
+            parentIdField: 'pid',
+            onLoadSuccess: function (data) {
+                $table.treegrid({
+                    treeColumn: 1,
+                    onChange: function () {
+                        $table.bootstrapTable('resetWidth');
+                    }
+                });
+            }
+        });
+    });
+
+    function authorityFormatter(value, row, index) {
+        value = value.trim();
+        if (value === "0") {
+            return "管理员权限";
+        } else if (value === "1") {
+            return "普通用户权限";
+        }else if(value === "def") {
+            return "未分配";
+        } else {
+            return "管理员，普通用户权限";
+        }
+    }
+
+    function operateFormatter(value, row, index) {
+        return "<a class='edit' href=\"javascript:void(0)\" ><i class=\"glyphicon glyphicon-pencil\"></i></a>&nbsp;"
+            + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class='delete' href=\"javascript:void(0)\" ><i class=\"glyphicon glyphicon-trash\"></i></a>";
+    }
+
+    function codeFormatter(value, row, index) {
+        if (value === -1) {
+            return "";
+        } else {
+            return value;
+        }
+    }
+
+    window.operateEvents = {
+        'click .edit': function (e, value, row) {
+            if(row.code === -1){
+                $("#saddin").hide();
+                $("#seditor").show();
+
+                $("#sid").val(row.id);
+                $("#stext").val(row.text);
+                $("#shref").val(row.href);
+                $("#spid").val(row.pid);
+
+                $("#sauthority option[value='"+row.authority+"']").attr("selected", true);
+                $("#fcloseable option[value='"+row.closeable+"']").attr("selected", true);
+
+                $("#smenuModal").modal("show");
+            }else{
+                $("#faddin").hide();
+                $("#feditor").show();
+
+                $("#fcode").val(row.code);
+                $("#fid").val(row.id);
+                $("#ftext").val(row.text);
+
+                $("#fauthority option[value='"+row.authority+"']").attr("selected", true);
+                $("#fcollapsed option[value='"+row.collapsed+"']").attr("selected", true);
+
+                $("#fmenuModal").modal("show");
+            }
+
+
+        },
+        'click .delete': function (e, value, row) {
+            $table.bootstrapTable('remove', {
+                field: 'id',
+                values: [row.id]
+            });
+            $.ajax({
+                url: "/menuManager/delete",
+                async: false,
+                type: "POST",
+                data: row,
+                success: function (result) {
+                    if (result) {
+                        $("#returnMessage").hide().html('<label class="label label-success">删除成功!</label>').show(300);
+                    } else {
+                        $("#returnMessage").hide().html('<label class="label label-danger">删除失败!</label>').show(300);
+                        $table.bootstrapTable('refresh');
+                    }
+                }, error: function () {
+                    $("#returnMessage").hide().html('<label class="label label-danger">删除失败!</label>').show(300);
+                }
+            })
+        }
+    };
+
+    $("#add").click(function () {
+        if($("#type").val() === "2"){
+            $("#saddin").show();
+            $("#seditor").hide();
+
+            $("#sid").val("");
+            $("#stext").val("");
+            $("#shref").val("");
+            $("#spid").val("");
+
+            $("#sauthority option[value='"+"def"+"']").attr("selected", true);
+            $("#fcloseable option[value='"+"true"+"']").attr("selected", true);
+
+            $("#smenuModal").modal("show");
+        }else{
+            $("#faddin").show();
+            $("#feditor").hide();
+
+            $("#fcode").val("");
+            $("#fid").val("");
+            $("#ftext").val("");
+
+            $("#fauthority option[value='"+"def"+"']").attr("selected", true);
+            $("#fcollapsed option[value='"+"true"+"']").attr("selected", true);
+
+            $("#fmenuModal").modal("show");
+        }
+    });
+
+    $("#faddin").click(function () {
+        $.ajax({
+            url: "/menuManager/addf",
+            async: false,
+            type: "POST",
+            data: $('#fmenuinfo').serialize(),
+            success: function (result) {
+                if (result) {
+                    $("#fmenuModal").modal("hide");
+                    $table.bootstrapTable('refresh');
+                    //window.location.reload();
+                    $("#returnMessage").hide().html('<label class="label label-success">新增成功!</label>').show(300);
+                } else {
+                    $("#freturnMessageModal").hide().html('<label class="label label-danger">新增失败!</label>').show(300);
+                }
+            }, error: function () {
+                $("#freturnMessageModal").hide().html('<label class="label label-danger">新增失败!</label>').show(300);
+            }
+        })
+    });
+
+    $("#saddin").click(function () {
+        $.ajax({
+            url: "/menuManager/adds",
+            async: false,
+            type: "POST",
+            data: $('#smenuinfo').serialize(),
+            success: function (result) {
+                if (result) {
+                    $("#smenuModal").modal("hide");
+                    $table.bootstrapTable('refresh');
+                    //window.location.reload();
+                    $("#returnMessage").hide().html('<label class="label label-success">新增成功!</label>').show(300);
+                } else {
+                    $("#sreturnMessageModal").hide().html('<label class="label label-danger">新增失败!</label>').show(300);
+                }
+            }, error: function () {
+                $("#sreturnMessageModal").hide().html('<label class="label label-danger">新增失败!</label>').show(300);
+            }
+        })
+    });
+
+    $("#feditor").click(function () {
+        $.ajax({
+            url: "/menuManager/editf",
+            async: false,
+            type: "POST",
+            data: $('#fmenuinfo').serialize(),
+            success: function (result) {
+                if (result) {
+                    $("#fmenuModal").modal("hide");
+                    $table.bootstrapTable('refresh');
+                    //window.location.reload();
+                    $("#returnMessage").hide().html('<label class="label label-success">修改成功!</label>').show(300);
+                } else {
+                    $("#freturnMessageModal").hide().html('<label class="label label-danger">修改失败!</label>').show(300);
+                }
+            }, error: function () {
+                $("#freturnMessageModal").hide().html('<label class="label label-danger">修改失败!</label>').show(300);
+            }
+        })
+    });
+
+    $("#seditor").click(function () {
+        $.ajax({
+            url: "/menuManager/edits",
+            async: false,
+            type: "POST",
+            data: $('#smenuinfo').serialize(),
+            success: function (result) {
+                if (result) {
+                    $("#smenuModal").modal("hide");
+                    $table.bootstrapTable('refresh');
+                    //window.location.reload();
+                    $("#returnMessage").hide().html('<label class="label label-success">修改成功!</label>').show(300);
+                } else {
+                    $("#sreturnMessageModal").hide().html('<label class="label label-danger">修改失败!</label>').show(300);
+                }
+            }, error: function () {
+                $("#sreturnMessageModal").hide().html('<label class="label label-danger">修改失败!</label>').show(300);
+            }
+        })
+    });
+
+
+</script>
+
+</html>

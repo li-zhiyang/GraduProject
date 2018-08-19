@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>测试的ECharts数据统计图</title>
+</head>
+<body>
+<!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
+<div id="main" style="width:560px; height:270px;"></div>
+
+<script src="/webjars/jquery/dist/jquery.js"></script>
+<script src="/webjars/echarts/dist/echarts.js"></script>
+<script type="text/javascript">
+    /**
+     * ajax传输图片信息.
+     */
+    function postImage(curdate) {
+        // 向后台发起请求保存图片到指定目录.
+        $.ajax({
+            type: 'POST',
+            url: '/echarts/saveImage',
+            async:false,
+            data: {picInfo: myChart.getDataURL(), picName: curdate+"111"},
+            success: function () {
+                console.log('通过post请求传输数据成功!');
+            }
+        });
+    }
+
+    //function createEcharts(start, end) {
+        // 基于准备好的dom，初始化echarts实例
+        var myChart = echarts.init(document.getElementById('main'));
+        //var option = null;
+
+        // 指定图表的配置项和数据
+        //$.get('data/asset/data/aqi-beijing.json?start='+start+'&end='+end, function (data) {
+            myChart.setOption(option = {
+                title: {
+                    text: '车辆效率'
+                },
+                animation: false, // 关闭动画效果
+                tooltip: {},
+                legend: {
+                    data: ['效率%']
+                },
+                xAxis: {
+                    data: ["2018-05-02", "2018-05-03", "2018-05-04", "2018-05-05", "2018-05-06", "2018-05-07"]
+                },
+                yAxis: {},
+                series: [{
+                    name: '效率%',
+                    type: 'bar',
+                    data: [5, 20, 36, 10, 10, 20]
+                }]
+            });
+        //});
+   // }
+</script>
+</body>
+</html>

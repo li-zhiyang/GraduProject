@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <link rel="stylesheet" href="/webjars/bootstrap/dist/css/bootstrap.css">
+    <link rel="stylesheet" href="/webjars/jstree/dist/themes/default/style.css"/>
+    <style>
+        html, body {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+<div class="row-fluid" style="height: 100%">
+
+    <div class="col-lg-2" style="height: 100%;background-color: #f5f5f5;border-right:1px solid #e8e9ee">
+        <input type="text" id="search_tree" placeholder="搜索电池" class="form-control" style="margin-top:20px;"/>
+        <div id="tree"></div>
+    </div>
+    <div class="col-lg-10" style="height: 100%;background-color: #f5f5f5">
+        <div class="col-lg-12" style="margin-top:20px;border-bottom:1px solid #e8e9ee;">
+            <input type="hidden" id="deviceid"/>
+            <label for="begintime">时间从</label>
+            <input type="date" id="begintime" class="form-control" style="width: 200px;display: inline-block;"/>
+            <label for="endtime">到</label>
+            <input type="date" id="endtime" class="form-control" style="width: 200px;display: inline-block;"/>
+            <button id="workbtn" class="btn btn-success">工作曲线</button>
+            <button id="mapbtn" class="btn btn-primary">充电图</button>
+        </div>
+        <div class="col-lg-12" id="workEcharts" style="width: 900px;height: 450px;;margin-top:20px;">
+
+        </div>
+        <div class="col-lg-12" id="mapEcharts" style="width: 900px;height: 450px;margin-top:20px;">
+
+        </div>
+    </div>
+</div>
+
+<script src="/webjars/jquery/dist/jquery.js"></script>
+<script src="/webjars/bootstrap/dist/js/bootstrap.js"></script>
+<script src="/webjars/jstree/dist/jstree.js"></script>
+<script src="/webjars/echarts/dist/echarts.js"></script>
+<script>
+    $(function () {
+        var myDate = new Date(); //获取今天日期
+        myDate.setDate(myDate.getDate() - 7);
+        document.getElementById("begintime").valueAsDate = myDate;
+        document.getElementById("endtime").valueAsDate = new Date();
+
+        $("#search_tree").bind("keypress", function (event) {
+            if (event.keyCode === 13) {
+                var v = $("#search_tree").val();
+                $("#tree").jstree(true).search(v);
+            }
+        });
+
+        $("#tree").jstree({
+            "core": {
+                "animation": 0,
+                "check_callback": true,
+                "force_text": true,
+                "themes": {"stripes": true},
+                'data': {
+                    'url': function (node) {
+                        return node.id === '#' ?
+                            '/carManager/batTreeNode.json' : '/carManager/batChildNode.json';
+                    },
+                    'data': function (node) {
+                        return {'id': node.id};
+                    }
+                }
+            },
+            "types": {
+                "#": {
+                    "max_children": 1,
+                    "max_depth": 4,
+                    "valid_children": ["root"]
+                },
+                "root": {
+                    "icon": "/assets/img/company.png",
+                    "valid_children": ["default"]
+                },
+                "default": {
+                    "icon": "/assets/img/type.png",
+                    "valid_children": ["default", "file"]
+                },
+                "file": {
+                    "icon": "/assets/img/elec_ico.png",
+                    "valid_children": []
+                }
+            },
+            "plugins": [
+                "dnd", "search",
+                "state", "types", "wholerow"
+            ]
+        });
+
+        //单击事件
+        $('#tree').bind('click.jstree', function (event) {
+
+            var eventNodeName = event.target.nodeName;
+            if (eventNodeName == 'INS') {
+                return;
+            } else if (eventNodeName == 'A') {
+                var $subject = $(event.target).parent();
+                if ($subject.find('ul').length > 0) {
+                } else {
+
+                    //选择的id值
+                    var deviceid = $(event.target).parents('li').attr('id');
+                    var arialevel = $(event.target).parents('li').attr('aria-level');
+
+                    if (arialevel == 2) {
+                        $("#deviceid").attr("value", deviceid);
+                    }
+                }
+            }
+        });
+
+        $("#workbtn").click(function () {
+
+            document.getElementById("workEcharts").style.display="block";
+            document.getElementById("mapEcharts").style.display="none";
+
+            var workEcharts = echarts.init(document.getElementById("workEcharts"));
+            var deviceid = $("#deviceid").val();
+
+            $.get('/carManager/getWorkEcharts.json?deviceid='+deviceid, function (data) {
+                workEcharts.setOption(option = {
+                    title: {
+                        text: '电池'+deviceid+'工作曲线'
+                    },
+                    tooltip: {
+                        trigger: 'axis'
+                    },
+                    legend: {
+                        data:['电量','电压','电流','电池温度']
+                    },
+                    xAxis: {
+                        data: data.map(function (item) {
+                            return item[0];
+                        })
+                    },
+                    yAxis: {
+                        type:'value'
+                    },
+                    toolbox: {
+                        left: 'right',
+                        feature: {
+                            dataZoom: {
+                                yAxisIndex: 'none'
+                            },
+                            restore: {},
+                            saveAsImage: {}
+                        }
+                    },
+                    dataZoom: [{
+                        startValue: '2014-06-01'
+                    }, {
+                        type: 'inside'
+                    }],
+                    series:[
+                        {
+                            name: '电量',
+                            type: 'line',
+                            data: data.map(function (item) {
+                                return item[1];
+                            })
+                        },
+                        {
+                            name: '电压',
+                            type: 'line',
+                            data: data.map(function (item) {
+                                return item[2];
+                            })
+                        },
+                        {
+                            name: '电流',
+                            type: 'line',
+                            data: data.map(function (item) {
+                                return item[3];
+                            })
+                        },
+                        {
+                            name: '电池温度',
+                            type: 'line',
+                            data: data.map(function (item) {
+                                return item[4];
+                            })
+                        },
+                    ]
+                });
+            });
+        });
+
+
+
+        $("#mapbtn").click(function () {
+            document.getElementById("echarts1").style.display="block";
+            document.getElementById("echarts").style.display="none";
+        });
+
+
+    });
+
+
+</script>
+</body>
+</html>

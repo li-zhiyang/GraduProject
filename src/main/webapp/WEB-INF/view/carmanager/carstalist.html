@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>车辆状态信息列表</title>
+    <link rel="stylesheet" href="/webjars/bootstrap/dist/css/bootstrap.css">
+    <link href="/webjars/bootstrap-table/dist/bootstrap-table.css" rel="stylesheet">
+
+</head>
+<body>
+<!--表格-->
+<div class=table-responsive">
+    <table id="infoTable"
+           data-toggle="table"
+           data-height="540"
+           data-search="true"
+           data-strict-search="true"
+           data-show-refresh="true"
+           data-search-align="right"
+           data-url="/carstate/getall"
+           class="table text-nowrap"
+    >
+        <thead>
+        <tr>
+            <th rowspan="2" data-field="ck" data-checkbox="true" data-valign="middle"></th>
+            <th colspan="5" data-align="center">车辆信息</th>
+            <th colspan="10" data-align="center">车辆状态信息</th>
+            <th colspan="11" data-align="center">车载电池信息</th>
+        </tr>
+        <tr>
+            <th data-field="carno" data-sortable="true" data-align="center">车辆编号</th>
+            <th data-field="licplate" data-align="center">车牌号</th>
+            <th data-field="powertype" data-align="center">动力类型</th>
+            <th data-field="com" data-align="center">所属公司</th>
+
+            <th data-field="curuser" data-align="center">当前用户</th>
+
+            <th data-field="driver" data-align="center">当前驾驶员</th>
+            <th data-field="speed" data-align="center" data-formatter="speedFormatter">车速km/h</th>
+            <th data-field="tspeed" data-align="center">发动机转速r/min</th>
+            <th data-field="watertemp" data-align="center">水温℃</th>
+            <th data-field="oiltemp" data-align="center">油温℃</th>
+            <th data-field="oilmass" data-align="center">油量%</th>
+            <th data-field="safebelt" data-align="center" data-formatter="safebeltFormatter">安全带</th>
+            <th data-field="braking" data-align="center" data-formatter="brakingFormatter">手制动</th>
+            <th data-field="reporttime" data-align="center" data-sortable="true" data-formatter="timeFormatter">上报时间</th>
+
+            <th data-field="order" data-align="center" data-formatter="orderFormatter">指令</th>
+
+            <th data-field="deviceid" data-sortable="true" data-align="center">设备编号</th>
+            <th data-field="batteryid" data-sortable="true" data-align="center">电池对外编号</th>
+            <th data-field="brand" data-align="center">品牌</th>
+            <th data-field="batmodel" data-align="center">电池型号</th>
+            <th data-field="battype" data-align="center">电池类型</th>
+
+            <th data-field="elecquantity" data-align="center">电量</th>
+            <th data-field="recentchargtime" data-align="center" data-formatter="timeFormatter">最近充电时间</th>
+
+            <th data-field="voltage" data-align="center">电压</th>
+            <th data-field="eleccurrent" data-align="center">电流</th>
+            <th data-field="batterytemp" data-align="center">温度℃</th>
+            <th data-field="warning" data-align="center" data-formatter="warningFormatter">液面报警</th>
+        </tr>
+        </thead>
+    </table>
+</div>
+<script src="/webjars/jquery/dist/jquery.js"></script>
+<script src="/webjars/bootstrap/dist/js/bootstrap.js"></script>
+<script src="/webjars/bootstrap-table/dist/bootstrap-table.js"></script>
+<script src="/webjars/bootstrap-table/dist/locale/bootstrap-table-zh-CN.js"></script>
+
+<script>
+    (function ($) {
+        'use strict';
+        $.fn.bootstrapTable.locales['zh-CN'] = {
+            formatSearch: function () {
+                return '搜索车辆编号/车牌号';
+            }
+        };
+        $.extend($.fn.bootstrapTable.defaults, $.fn.bootstrapTable.locales['zh-CN']);
+    })(jQuery);
+
+    function timeFormatter(value) {
+        var date = new Date(value);
+        Y = date.getFullYear()%1000 + '-';
+        M = (date.getMonth() + 1 ) + '-';
+        D = date.getDate() + ' ';
+        h = date.getHours() + ':';
+        m = date.getMinutes() + ':';
+        s = date.getSeconds();
+        return Y + M + D + h + m + s;
+    }
+
+    function safebeltFormatter(value) {
+        if(value === "1"){
+            return "<span class=\"label label-success\">正常</span>";
+        }else{
+            return "<span class=\"label label-warning\">异常</span>";
+        }
+    }
+
+    function brakingFormatter(value) {
+        if(value === "1"){
+            return "<span class=\"label label-success\">正常</span>";
+        }else{
+            return "<span class=\"label label-warning\">异常</span>";
+        }
+    }
+
+    function orderFormatter() {
+        return "<a class='order' href=\"javascript:void(0)\" ><i class=\"glyphicon glyphicon-wrench\"></i></a>";
+    }
+
+    function speedFormatter(value) {
+        if(value >60){
+            return "<span class=\"label label-danger\">"+value+"</span>";
+        }else{
+            return value;
+        }
+    }
+
+    function warningFormatter(value){
+        if(value === "0"){
+            return "<span class=\"label label-success\">正常</span>";
+        }else{
+            return "<span class=\"label label-warning\">异常</span>";
+        }
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>用户账号管理</title>
+
+    <link rel="stylesheet" href="/webjars/bootstrap/dist/css/bootstrap.css">
+    <link rel="stylesheet" href="/webjars/bootstrap-table/dist/bootstrap-table.css">
+
+    <script src="/webjars/jquery/dist/jquery.js"></script>
+    <script src="/webjars/bootstrap/dist/js/bootstrap.js"></script>
+    <script src="/webjars/bootstrap-table/dist/bootstrap-table.js"></script>
+    <script src="/webjars/bootstrap-table/dist/locale/bootstrap-table-zh-CN.js"></script>
+
+</head>
+<body>
+<div class="container">
+    <!--TODO 将标题和toolbar 放在一行-->
+    <div id="toolbar">
+        <button id="add" type="submit" class="btn btn-success">
+            <span class="glyphicon glyphicon-plus">添加</span>
+        </button>
+        <span id="returnMessage"></span>
+        <!--</div>-->
+    </div>
+    <!--data-strict-search="true"-->
+    <table id="table"
+           data-toggle="table"
+           data-height="540"
+           data-toolbar="#toolbar"
+           data-show-refresh="true"
+           data-show-columns="true"
+           data-striped="true"
+           data-search="true"
+
+           data-url="/carinfoin/getinfo">
+        <thead>
+        <tr>
+            <th data-field="carno" data-halign="center">车辆编号</th>
+            <th data-field="licplate" data-halign="center">车牌号码</th>
+            <th data-field="powertype" data-halign="center">动力类型</th>
+            <th data-field="company" data-halign="center">所属公司</th>
+            <th data-field="operate" data-formatter="operateFormatter" data-halign="center" data-align="center" data-events="operateEvents">
+                操作
+            </th>
+        </tr>
+        </thead>
+    </table>
+
+</div>
+
+<script>
+
+    function operateFormatter(value, row, index) {
+        return "<a class='edit' href=\"javascript:void(0)\" ><i class=\"glyphicon glyphicon-pencil\"></i></a>&nbsp;"
+            + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class='delete' href=\"javascript:void(0)\" ><i class=\"glyphicon glyphicon-trash\"></i></a>";
+    }
+
+</script>
+</body>
+</html>
