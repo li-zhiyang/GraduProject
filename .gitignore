@@ -1,0 +1,6 @@
+# 忽略指定文件
+GraduProject.iml
+
+# 忽略指定文件夹
+target/
+.idea/
