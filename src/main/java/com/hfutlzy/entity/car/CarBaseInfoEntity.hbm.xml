@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-mapping PUBLIC
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+
+    <class name="com.hfutlzy.entity.car.CarBaseInfoEntity" table="CAR_BASE_INFO" schema="SPRING">
+        <id name="carno" column="CARNO"/>
+        <property name="powertype" column="POWERTYPE"/>
+        <property name="licplate" column="LICPLATE"/>
+        <many-to-one name="companyEntity" class="com.hfutlzy.entity.car.CompanyEntity" column="COM" cascade="all"/>
+    </class>
+</hibernate-mapping>

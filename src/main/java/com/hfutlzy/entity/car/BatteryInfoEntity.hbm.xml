@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-mapping PUBLIC
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+
+    <class name="com.hfutlzy.entity.car.BatteryInfoEntity" table="BATTERY_INFO" schema="SPRING">
+        <id name="deviceid" column="DEVICEID"/>
+        <property name="batteryid" column="BATTERYID"/>
+        <property name="brand" column="BRAND"/>
+        <property name="batmodel" column="BATMODEL"/>
+        <property name="battype" column="BATTYPE"/>
+
+        <many-to-one name="companyEntity" class="com.hfutlzy.entity.car.CompanyEntity" cascade="all" column="COM"/>
+    </class>
+</hibernate-mapping>

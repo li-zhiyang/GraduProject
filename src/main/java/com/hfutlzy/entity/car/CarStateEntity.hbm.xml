@@ -1,0 +1,32 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-mapping PUBLIC
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+
+    <class name="com.hfutlzy.entity.car.CarStateEntity" table="CAR_STATE" schema="SPRING">
+        <id name="id" column="ID"/>
+        <property name="driver" column="DRIVER"/>
+        <property name="speed" column="SPEED"/>
+        <property name="tspeed" column="TSPEED"/>
+        <property name="watertemp" column="WATERTEMP"/>
+        <property name="oiltemp" column="OILTEMP"/>
+        <property name="curuser" column="CURUSER"/>
+        <property name="elecquantity" column="ELECQUANTITY"/>
+        <property name="recentchargtime" column="RECENTCHARGTIME"/>
+        <property name="oilmass" column="OILMASS"/>
+        <property name="safebelt" column="SAFEBELT"/>
+        <property name="braking" column="BRAKING"/>
+        <property name="reporttime" column="REPORTTIME"/>
+        <property name="longitude" column="LONGITUDE"/>
+        <property name="latitude" column="LATITUDE"/>
+
+        <property name="voltage" column="VOLTAGE"/>
+        <property name="eleccurrent" column="ELECCURRENT"/>
+        <property name="warning" column="WARNING"/>
+        <property name="batterytemp" column="BATTERYTEMP"/>
+
+        <many-to-one name="batteryInfoEntity" class="com.hfutlzy.entity.car.BatteryInfoEntity" column="DEVICEID" cascade="all"/>
+        <many-to-one name="carBaseInfoEntity" class="com.hfutlzy.entity.car.CarBaseInfoEntity" column="CARNO" cascade="all"/>
+    </class>
+</hibernate-mapping>

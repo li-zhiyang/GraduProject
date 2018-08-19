@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-mapping PUBLIC
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+
+    <class name="com.hfutlzy.entity.car.MaxStateDateEntity" table="MAX_STATE_DATE" schema="SPRING">
+        <id name="carno" column="CARNO"/>
+        <property name="deviceid" column="DEVICEID"/>
+        <property name="maxdate" column="MAXDATE"/>
+    </class>
+</hibernate-mapping>
